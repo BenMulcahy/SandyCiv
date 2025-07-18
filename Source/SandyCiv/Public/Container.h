@@ -23,10 +23,6 @@ public:
 
 protected:
 
-	/// <summary>
-	/// Helper function for setting mesh on given component
-	/// </summary>
-	bool SetPanelStaticMesh(TObjectPtr<UStaticMeshComponent> meshComponent, TObjectPtr<UStaticMesh> newMesh);
 	
 	/// <summary>
 	/// Select Random Mesh for each section
@@ -48,6 +44,11 @@ protected:
 		return Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *filePath));
 	}
 
+private:
+	/// <summary>
+	/// Helper function for setting mesh on given component
+	/// </summary>
+	bool SetPanelStaticMesh(TObjectPtr<UStaticMeshComponent> meshComponent, TObjectPtr<UStaticMesh> newMesh);
 
 #pragma region Properties
 
