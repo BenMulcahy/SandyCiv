@@ -57,6 +57,8 @@ void AContainer::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	//TODO: Bool to hide each door
+	
 	/// SET DOORS ANGLES ///
 	if (bFrontAngleMatched)
 	{
