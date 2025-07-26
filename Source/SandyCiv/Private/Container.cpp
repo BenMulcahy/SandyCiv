@@ -57,8 +57,12 @@ void AContainer::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	//TODO: Bool to hide each door
-	
+	/// SET DOOR VISIBILITY ///
+	SetPanelVisibilty(m_Door_Front_L, !bHideDoor_Front_L);
+	SetPanelVisibilty(m_Door_Front_R, !bHideDoor_Front_R);
+	SetPanelVisibilty(m_Door_Rear_L, !bHideDoor_Rear_L);
+	SetPanelVisibilty(m_Door_Rear_R, !bHideDoor_Rear_R);
+
 	/// SET DOORS ANGLES ///
 	if (bFrontAngleMatched)
 	{

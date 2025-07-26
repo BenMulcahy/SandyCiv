@@ -50,6 +50,15 @@ private:
 	/// </summary>
 	bool SetPanelStaticMesh(TObjectPtr<UStaticMeshComponent> meshComponent, TObjectPtr<UStaticMesh> newMesh);
 
+	FORCEINLINE UFUNCTION()
+	bool SetPanelVisibilty(TObjectPtr<UStaticMeshComponent> meshComponent, bool bIsVisible)
+	{
+		if (!IsValid(meshComponent)) return false;
+		meshComponent->SetVisibility(bIsVisible);
+		meshComponent->SetCollisionEnabled(bIsVisible ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+		return meshComponent->GetVisibleFlag();
+	}
+
 #pragma region Properties
 
 public:
@@ -88,22 +97,34 @@ public:
 
 #pragma region Doors
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite,Category = "Doors", meta=(EditInlineConditionToggle)) //TODO: EditInlineConditionToggle not functioning?
-	bool bFrontAngleMatched = true;
+	UPROPERTY(EditInstanceOnly,BlueprintReadWrite, Category = "Doors | Visibility")
+	bool bHideDoor_Front_L = false;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors", meta=(Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Visibility")
+	bool bHideDoor_Front_R = false;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Visibility")
+	bool bHideDoor_Rear_L = false;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Visibility")
+	bool bHideDoor_Rear_R = false;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite,Category = "Doors | Open/Close") 
+	bool bFrontAngleMatched = false;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Open/Close", meta=(Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
 	float Door_Front_L_Angle;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors", meta = (EditCondition = "bFrontAngleMatched == false", EditConditionHides, Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240)) 
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Open/Close", meta = (EditCondition = "bFrontAngleMatched == false", EditConditionHides, Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240)) 
 	float Door_Front_R_Angle;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors", meta = (EditInlineConditionToggle))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Open/Close")
 	bool bRearAngleMatched = true;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors", meta = (Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Open/Close", meta = (Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
 	float Door_Rear_L_Angle;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors", meta = (EditCondition = "bRearAngleMatched == false", EditConditionHides, Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Open/Close", meta = (EditCondition = "bRearAngleMatched == false", EditConditionHides, Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
 	float Door_Rear_R_Angle;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Doors", DisplayName = "Front Left Door")
