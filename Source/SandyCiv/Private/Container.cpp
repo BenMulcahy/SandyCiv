@@ -12,6 +12,11 @@ AContainer::AContainer()
 
 	m_root = CreateDefaultSubobject<USceneComponent>(TEXT("root"));
 	RootComponent = m_root;
+
+	m_PCGBoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("PCG Collider"));
+	m_PCGBoxCollider->SetupAttachment(RootComponent);
+	m_PCGBoxCollider->SetRelativeLocation(FVector(0, 0, 128));
+	m_PCGBoxCollider->SetBoxExtent(FVector(318, 124, 120));
 	
 	m_arrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	m_arrowComponent->SetupAttachment(RootComponent);
@@ -57,6 +62,8 @@ void AContainer::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	if(objectSeed == NULL) objectSeed = FMath::Rand32();
+
 	/// SET DOOR VISIBILITY ///
 	SetPanelVisibilty(m_Door_Front_L, !bHideDoor_Front_L);
 	SetPanelVisibilty(m_Door_Front_R, !bHideDoor_Front_R);
@@ -64,15 +71,86 @@ void AContainer::OnConstruction(const FTransform& Transform)
 	SetPanelVisibilty(m_Door_Rear_R, !bHideDoor_Rear_R);
 
 	/// SET DOORS ANGLES ///
+	UpdateDoorAnlges();
+}
+
+void AContainer::OpenDoorPCG()
+{
+	bool frontBlocked = isDoorBlocked();
+	bool rearBlocked = isDoorBlocked(true);
+
+	bFrontAngleMatched = frontBlocked;
+	bRearAngleMatched = rearBlocked;
+
+	Door_Front_L_Angle = frontBlocked ? 0 : PCGDoorOpenAngle;
+	Door_Front_R_Angle = frontBlocked ? 0 : PCGDoorOpenAngle;
+	Door_Rear_L_Angle = rearBlocked ? 0 : PCGDoorOpenAngle;
+	Door_Rear_R_Angle = rearBlocked ? 0 : PCGDoorOpenAngle;
+
+	UpdateDoorAnlges();
+}
+
+
+bool AContainer::isDoorBlocked(bool checkRear)
+{
+	FHitResult hit;
+	FCollisionQueryParams colParams;
+	colParams.AddIgnoredActor(this);
+	colParams.AddIgnoredComponent(Cast<UPrimitiveComponent>(m_PCGBoxCollider));
+	
+	UE_LOG(LogTemp, Warning, TEXT("Ignores: %d"), colParams.GetIgnoredComponents().Num());
+	FVector lpos;
+	FVector rpos;
+	float traceDist = 100;
+
+	if (checkRear)
+	{
+		lpos = m_Door_Rear_L->GetComponentLocation() + (GetActorUpVector() * 40) + (GetActorRightVector() * 30);
+		rpos = m_Door_Rear_R->GetComponentLocation() + (GetActorUpVector() * 40) + (GetActorRightVector() * -30);
+		traceDist *= -1;
+	}
+	else
+	{
+		lpos = m_Door_Front_L->GetComponentLocation() + (GetActorUpVector() * 40) + (GetActorRightVector() * -30);
+		rpos = m_Door_Front_R->GetComponentLocation() + (GetActorUpVector() * 40) + (GetActorRightVector() * 30);
+	}
+
+	//DrawDebugLine(GetWorld(), lpos, lpos + (GetActorForwardVector() * traceDist),FColor::Purple, false,10, ESceneDepthPriorityGroup::SDPG_Foreground, 5);
+	//DrawDebugLine(GetWorld(), rpos, rpos + (GetActorForwardVector() * traceDist), FColor::Green, false, 10, ESceneDepthPriorityGroup::SDPG_Foreground, 5);
+
+	//LEFT SIDE
+	if (GetWorld()->LineTraceSingleByChannel(hit, lpos, lpos + (GetActorForwardVector() * traceDist), ECC_GameTraceChannel1, colParams))
+	{
+		if (hit.IsValidBlockingHit() && hit.GetActor() != nullptr)
+		{
+			return true;
+		}
+	}
+	
+	// RIGHT SIDE
+	hit.Reset();
+	if(GetWorld()->LineTraceSingleByChannel(hit, rpos, rpos + (GetActorForwardVector() * traceDist), ECC_GameTraceChannel1, colParams)) 
+	{
+		if (hit.IsValidBlockingHit() && hit.GetActor() != nullptr)
+		{
+			return true;
+		}
+	}
+
+	return false; 
+}
+
+void AContainer::UpdateDoorAnlges()
+{
 	if (bFrontAngleMatched)
 	{
-		m_Door_Front_L->SetRelativeRotation(FRotator(0, Door_Front_L_Angle,0).Quaternion());
-		m_Door_Front_R->SetRelativeRotation(FRotator(0.f, Door_Front_L_Angle * -1,0).Quaternion());
+		m_Door_Front_L->SetRelativeRotation(FRotator(0, Door_Front_L_Angle, 0).Quaternion());
+		m_Door_Front_R->SetRelativeRotation(FRotator(0.f, Door_Front_L_Angle * -1, 0).Quaternion());
 	}
 	else
 	{
 		m_Door_Front_L->SetRelativeRotation(FRotator(0, Door_Front_L_Angle, 0).Quaternion());
-		m_Door_Front_R->SetRelativeRotation(FRotator(0.f, Door_Front_R_Angle *-1, 0).Quaternion());
+		m_Door_Front_R->SetRelativeRotation(FRotator(0.f, Door_Front_R_Angle * -1, 0).Quaternion());
 	}
 
 	if (bRearAngleMatched)
@@ -87,7 +165,6 @@ void AContainer::OnConstruction(const FTransform& Transform)
 	}
 }
 
-
 bool AContainer::SetPanelStaticMesh(TObjectPtr<UStaticMeshComponent> meshComponent, TObjectPtr<UStaticMesh> newMesh)
 {
 	meshComponent->SetStaticMesh(newMesh);
@@ -95,7 +172,6 @@ bool AContainer::SetPanelStaticMesh(TObjectPtr<UStaticMeshComponent> meshCompone
 	if (meshComponent->GetStaticMesh() == newMesh) return true;
 	else return false;
 }
-
 
 TObjectPtr<UStaticMesh> AContainer::ChooseMeshFromObjLibrary(UObjectLibrary* meshLibrary, bool bRandomMesh, int meshIndex)
 {

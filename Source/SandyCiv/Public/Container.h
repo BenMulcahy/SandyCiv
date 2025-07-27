@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Engine/ObjectLibrary.h"
 #include "GameFramework/Actor.h"
@@ -20,6 +21,11 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/// <summary>
+	/// Opens appropriate doors for PCG generated containers
+	/// </summary>
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void OpenDoorPCG();
 
 protected:
 
@@ -44,6 +50,9 @@ protected:
 		return Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), NULL, *filePath));
 	}
 
+	UFUNCTION()
+	void UpdateDoorAnlges();
+
 private:
 	/// <summary>
 	/// Helper function for setting mesh on given component
@@ -58,10 +67,18 @@ private:
 		meshComponent->SetCollisionEnabled(bIsVisible ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 		return meshComponent->GetVisibleFlag();
 	}
+	
+	bool isDoorBlocked(bool checkRear = false);
+
+	int32 objectSeed;
+	float PCGDoorOpenAngle = 110;
 
 #pragma region Properties
 
 public:
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> m_PCGBoxCollider = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UObjectLibrary> doorsLibrary_L = nullptr;
