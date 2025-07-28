@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void OpenDoorPCG();
 
+	UFUNCTION(BlueprintCallable)
+	void SetPCGDoorOpenMinMax(float min, float max);
+
 protected:
 
 	
@@ -71,7 +74,9 @@ private:
 	bool isDoorBlocked(bool checkRear = false);
 
 	int32 objectSeed;
-	float PCGDoorOpenAngle = 110;
+	
+	float PCGDoorOpenAngleMin = 95;
+	float PCGDoorOpenAngleMax = 125;
 
 #pragma region Properties
 

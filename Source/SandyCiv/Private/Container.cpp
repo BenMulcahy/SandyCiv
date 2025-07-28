@@ -72,24 +72,49 @@ void AContainer::OnConstruction(const FTransform& Transform)
 
 	/// SET DOORS ANGLES ///
 	UpdateDoorAnlges();
+	
 }
 
+/// PROCEDRUAL CONTENT ///
+#if WITH_EDITOR
 void AContainer::OpenDoorPCG()
 {
-	bool frontBlocked = isDoorBlocked();
-	bool rearBlocked = isDoorBlocked(true);
+	bool frontClosed = isDoorBlocked();
+	bool rearClosed = isDoorBlocked(true);
 
-	bFrontAngleMatched = frontBlocked;
-	bRearAngleMatched = rearBlocked;
+	//bFrontAngleMatched = frontClosed;
+	//bRearAngleMatched = rearClosed;
 
-	Door_Front_L_Angle = frontBlocked ? 0 : PCGDoorOpenAngle;
-	Door_Front_R_Angle = frontBlocked ? 0 : PCGDoorOpenAngle;
-	Door_Rear_L_Angle = rearBlocked ? 0 : PCGDoorOpenAngle;
-	Door_Rear_R_Angle = rearBlocked ? 0 : PCGDoorOpenAngle;
+	TObjectPtr<AActor> owner = GetAttachParentActor(); //Get owning Blueprint
+	if (!frontClosed && !rearClosed && owner != nullptr)
+	{
+		//Get vector direction
+		FVector loc = GetActorLocation() - owner->GetActorLocation();
+		loc.Normalize();
+		//UE_LOG(LogTemp, Warning, TEXT("Vector: %s, dot: %f"), *loc.ToString(), loc.Dot(GetActorForwardVector()));
+
+		//Check if vector forward or backward of owning blueprint point and close appropriate door
+		if (loc.Dot(GetActorForwardVector()) > 0)
+		{
+			rearClosed = true; 
+		}
+		else frontClosed = true;
+	}
+
+	//Set door angles
+	Door_Front_L_Angle = frontClosed ? 0 : FMath::RandRange(PCGDoorOpenAngleMin, PCGDoorOpenAngleMax);
+	Door_Front_R_Angle = frontClosed ? 0 : FMath::RandRange(PCGDoorOpenAngleMin, PCGDoorOpenAngleMax);
+	Door_Rear_L_Angle = rearClosed ? 0 : FMath::RandRange(PCGDoorOpenAngleMin, PCGDoorOpenAngleMax);
+	Door_Rear_R_Angle = rearClosed ? 0 : FMath::RandRange(PCGDoorOpenAngleMin, PCGDoorOpenAngleMax);
 
 	UpdateDoorAnlges();
 }
 
+void AContainer::SetPCGDoorOpenMinMax(float min, float max)
+{
+	if (min <= 0) PCGDoorOpenAngleMin = min;
+	if (max <= 0) PCGDoorOpenAngleMax = max;
+}
 
 bool AContainer::isDoorBlocked(bool checkRear)
 {
@@ -103,6 +128,7 @@ bool AContainer::isDoorBlocked(bool checkRear)
 	FVector rpos;
 	float traceDist = 100;
 
+	//Set L and R trace position offsets for front and rear
 	if (checkRear)
 	{
 		lpos = m_Door_Rear_L->GetComponentLocation() + (GetActorUpVector() * 40) + (GetActorRightVector() * 30);
@@ -221,6 +247,7 @@ void AContainer::SetChosenMesh(UStaticMeshComponent* panelMesh, UObjectLibrary* 
 	}
 }
 
+#endif //WITH_EDITOR
 
 
 
