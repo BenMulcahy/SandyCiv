@@ -101,18 +101,18 @@ public:
 	UPROPERTY(EditAnywhere, DisplayName = "DefaultSceneRoot")
 	TObjectPtr<USceneComponent> m_root;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Floor", DisplayName = "Container Floor")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Floor", DisplayName = "Container Floor")
 	TObjectPtr<UStaticMeshComponent> m_Container_Floor;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Roof", DisplayName = "Container Roof")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Roof", DisplayName = "Container Roof")
 	TObjectPtr<UStaticMeshComponent> m_Container_Roof;
 
 #pragma region Walls
 
-	UPROPERTY(BlueprintReadOnly, Category = "Walls", DisplayName = "Left Wall")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Walls", DisplayName = "Left Wall")
 	TObjectPtr<UStaticMeshComponent> m_Wall_L;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Walls", DisplayName = "Right Wall")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Walls", DisplayName = "Right Wall")
 	TObjectPtr<UStaticMeshComponent> m_Wall_R;
 
 #pragma endregion
@@ -149,16 +149,16 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Doors | Open/Close", meta = (EditCondition = "bRearAngleMatched == false", EditConditionHides, Units = "Degrees", ClampMin = 0, ClampMax = 240, UIMin = 0, UIMax = 240))
 	float Door_Rear_R_Angle;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Doors", DisplayName = "Front Left Door")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Doors", DisplayName = "Front Left Door")
 	TObjectPtr<UStaticMeshComponent> m_Door_Front_L;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Doors", DisplayName = "Front Right Door")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Doors", DisplayName = "Front Right Door")
 	TObjectPtr<UStaticMeshComponent> m_Door_Front_R;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Doors", DisplayName = "Rear Left Door")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Doors", DisplayName = "Rear Left Door")
 	TObjectPtr<UStaticMeshComponent> m_Door_Rear_L;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Doors", DisplayName = "Rear Right Door")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Doors", DisplayName = "Rear Right Door")
 	TObjectPtr<UStaticMeshComponent> m_Door_Rear_R;
 
 #pragma endregion
