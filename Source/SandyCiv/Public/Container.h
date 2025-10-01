@@ -56,6 +56,9 @@ protected:
 	UFUNCTION()
 	void UpdateDoorAnlges();
 
+	UFUNCTION(BlueprintCallable)
+	bool isDoorBlocked(bool checkRear = false);
+	
 private:
 	/// <summary>
 	/// Helper function for setting mesh on given component
@@ -71,7 +74,6 @@ private:
 		return meshComponent->GetVisibleFlag();
 	}
 	
-	bool isDoorBlocked(bool checkRear = false);
 
 	int32 objectSeed;
 	

@@ -47,6 +47,7 @@ AContainer::AContainer()
 	m_Container_Roof->SetRelativeLocation(FVector(0, 0, 255));
 	m_Wall_L->SetRelativeLocation(FVector(0, 125.6, 13));
 	m_Wall_R->SetRelativeLocation(FVector(0, -125.6, 13));
+	m_Wall_R->SetRelativeRotation(FRotator(0, 180, 0));
 	m_Door_Front_L->SetRelativeLocation(FVector(316.433838, 125, 132.9));
 	m_Door_Front_R->SetRelativeLocation(FVector(316.433838, -125, 132.9));
 	m_Door_Rear_L->SetRelativeLocation(FVector(-316.433838, -125, 132.9));
@@ -96,9 +97,12 @@ void AContainer::OpenDoorPCG()
 		//Check if vector forward or backward of owning blueprint point and close appropriate door
 		if (loc.Dot(GetActorForwardVector()) > 0)
 		{
-			rearClosed = true; 
+			rearClosed = true;
 		}
-		else frontClosed = true;
+		else
+		{
+			frontClosed = true;
+		}
 	}
 
 	//Set door angles
@@ -231,10 +235,51 @@ void AContainer::SetRandomMeshes()
 	m_Wall_L->SetStaticMesh(ChooseMeshFromObjLibrary(wallsLibrary));
 	m_Wall_R->SetStaticMesh(ChooseMeshFromObjLibrary(wallsLibrary));
 	m_Container_Roof->SetStaticMesh(ChooseMeshFromObjLibrary(roofLibrary));
-	m_Door_Front_L->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_L));
-	m_Door_Front_R->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_R));
-	m_Door_Rear_L->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_L));
-	m_Door_Rear_R->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_R));
+
+	//bFrontAngleMatched = frontClosed;
+	//bRearAngleMatched = rearClosed;
+
+	TObjectPtr<AActor> owner = GetAttachParentActor(); //Get owning Blueprint
+	if (owner != nullptr && ActorHasTag("PCG_Container"))
+	{
+		//Get vector direction
+		FVector loc = GetActorLocation() - owner->GetActorLocation();
+		loc.Normalize();
+		//UE_LOG(LogTemp, Warning, TEXT("Vector: %s, dot: %f"), *loc.ToString(), loc.Dot(GetActorForwardVector()));
+
+		//Check if vector forward or backward of owning blueprint point and close appropriate door
+		if (loc.Dot(GetActorForwardVector()) > 0)
+		{
+			//rear
+			SetChosenMesh(m_Door_Rear_L, doorsLibrary_L, 0); //set mesh to solid (no windows etc)
+			SetChosenMesh(m_Door_Rear_R, doorsLibrary_R, 0);
+		}
+		else
+		{
+			m_Door_Rear_L->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_L));
+			m_Door_Rear_R->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_R));
+		}
+
+
+		if (loc.Dot(GetActorForwardVector()) < 0)
+		{
+			//front
+			SetChosenMesh(m_Door_Front_L, doorsLibrary_L, 0); //set mesh to solid (no windows etc)
+			SetChosenMesh(m_Door_Front_R, doorsLibrary_R, 0);
+		}
+		else
+		{
+			m_Door_Front_L->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_L));
+			m_Door_Front_R->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_R));
+		}
+	}
+	else
+	{
+		m_Door_Rear_L->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_L));
+		m_Door_Rear_R->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_R));
+		m_Door_Front_L->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_L));
+		m_Door_Front_R->SetStaticMesh(ChooseMeshFromObjLibrary(doorsLibrary_R));
+	}
 }
 
 //set mesh on given component with given index
@@ -242,6 +287,7 @@ void AContainer::SetChosenMesh(UStaticMeshComponent* panelMesh, UObjectLibrary* 
 {
 	if (panelMesh != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Set mesh!"));
 		meshIndex = FMath::Clamp(meshIndex, 0, meshLibrary->GetObjectCount() -1); //clamp index to mesh library
 		panelMesh->SetStaticMesh(ChooseMeshFromObjLibrary(meshLibrary, false, meshIndex));
 	}
